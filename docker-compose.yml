@@ -8,10 +8,19 @@ services:
       - "6123"
     ports:
       - "8081:8081"
+      - "8082:8082"
     command: jobmanager
+    volumes:
+      - ./completed-jobs:/opt/flink/completed-jobs
     environment:
+      #- JOB_MANAGER_RPC_ADDRESS=jobmanager
       - TZ=Asia/Taipei
-      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        jobmanager.archive.fs.dir: file:///opt/flink/completed-jobs/
+        historyserver.archive.fs.dir: file:///opt/flink/completed-jobs/
+        historyserver.archive.fs.refresh-interval: 10000   
 
   taskmanager:
     image: flink-cdc
