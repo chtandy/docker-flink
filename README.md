@@ -23,22 +23,12 @@
 
 
 ### flink-cd-connectors
-- [flink-cd-connectors](https://github.com/ververica/flink-cdc-connectors)   
+- [flink-cdc-connectors](https://github.com/ververica/flink-cdc-connectors)   
 - [cdc jar](https://repo1.maven.org/maven2/com/ververica/)   
 - [flink](https://repo.maven.apache.org/maven2/org/apache/flink/)   
 
 
 ### 此專案的運行方式是使用最簡易的 Session Cluster 模式
-
-### 使用方式
-- 此範例Session Mode
-- 已包含slasticsearch, kibana, oracle
-- clone 下來之後，先執行`docker-compose build`, 接著執行`docker-compose up -d`
-- 此案例啟用CDC方式是Flink SQL Client
-  - 進入jobmanager Container
-  - 執行/opt/flink/bin/sql-client.sh
-
-
 
 
 ---
@@ -51,7 +41,12 @@ This project provides a set of source connectors for Apache Flink® directly ing
 - 使用方式  
   - [SQL API, Flink SQL Client](https://ververica.github.io/flink-cdc-connectors/master/content/about.html#usage-for-table-sql-api)  
   - [DataStream API](https://ververica.github.io/flink-cdc-connectors/master/content/about.html#usage-for-datastream-api)  
-
+- 此範例Session Mode
+- 已包含slasticsearch, kibana, oracle
+- clone 下來之後，先執行`docker-compose build`, 接著執行`docker-compose up -d`
+- 此案例啟用CDC方式是Flink SQL Client
+  - 進入jobmanager Container
+  - 執行/opt/flink/bin/sql-client.sh
 
 ### 新增cdc connection jar
 - 將檔案放置`/opt/flink/lib`下
