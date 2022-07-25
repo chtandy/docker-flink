@@ -8,19 +8,10 @@ services:
       - "6123"
     ports:
       - "8081:8081"
-      - "8082:8082"
     command: jobmanager
-    volumes:
-      - ./completed-jobs:/opt/flink/completed-jobs
     environment:
-      #- JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
       - TZ=Asia/Taipei
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        jobmanager.archive.fs.dir: file:///opt/flink/completed-jobs/
-        historyserver.archive.fs.dir: file:///opt/flink/completed-jobs/
-        historyserver.archive.fs.refresh-interval: 10000   
 
   taskmanager:
     image: flink-cdc
@@ -39,5 +30,34 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 5 
+        taskmanager.numberOfTaskSlots: 3
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+    hostname: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+      DISCOVERY.TYPE: "single-node"
+      cluster.initial_master_nodes: "elasticsearch"
+      cluster.name: "elasticsearch"
+      bootstrap.memory_lock: 'false'
+      #ELASTIC_PASSWORD: 'changeme'
+      xpack.security.enabled: 'false'
+      xpack.ml.enabled: 'false'
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.5
+    ports:
+      - "5601:5601"
+    environment:
+      SERVER_HOST: "0.0.0.0"
+      ELASTICSEARCH_HOSTS: 'http://elasticsearch:9200'
+
+  oracle:
+    image: yuxialuo/oracle-xe-11g-r2-cdc-demo:v1.0
+    ports:
+      - "1521:1521"
 

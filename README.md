@@ -30,19 +30,16 @@
 
 ### 此專案的運行方式是使用最簡易的 Session Cluster 模式
 
-### docker 環境變數
-- 目前遇過的方式 
-```
-    environment:
-      - JOB_MANAGER_RPC_ADDRESS=jobmanager
-```
-or 
-```
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-```
+### 使用方式
+- 此範例Session Mode
+- 已包含slasticsearch, kibana, oracle
+- clone 下來之後，先執行`docker-compose build`, 接著執行`docker-compose up -d`
+- 此案例啟用CDC方式是Flink SQL Client
+  - 進入jobmanager Container
+  - 執行/opt/flink/bin/sql-client.sh
+
+
+
 
 ---
 # flink CDC
@@ -62,6 +59,67 @@ This project provides a set of source connectors for Apache Flink® directly ing
 ### 官方範例說明
 - [Streaming ETL for MySQL and Postgres with Flink CDC](https://ververica.github.io/flink-cdc-connectors/master/content/quickstart/mysql-postgres-tutorial.html)   
 - [Oracle CDC to Elasticsearch](https://ververica.github.io/flink-cdc-connectors/master/content/quickstart/oracle-tutorial.html)   
+
+
+### Flink CDC History
+- 需單獨額外執行
+- 修改或是增加參數
+  可在/opt/flink/conf/flink-conf.yaml 看到官方範例檔案
+  ```
+  jobmanager.archive.fs.dir: file:///opt/flink/completed-jobs/
+  historyserver.archive.fs.dir: file:///opt/flink/completed-jobs/
+  historyserver.archive.fs.refresh-interval: 10000
+  ```
+
+- 執行方式
+  - 進入jobmanager Container
+  - /opt/flink/bin/historyserver.sh {start|stop|restart}
+- 瀏覽{flink IP}:8082
+- docker-compose範例
+```
+version: "3"
+services:
+  jobmanager:
+    image: flink-cdc
+    build:
+      context: ./
+    expose:
+      - "6123"
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+    command: jobmanager
+    volumes:
+      - ./completed-jobs:/opt/flink/completed-jobs
+    environment:
+      #- JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - TZ=Asia/Taipei
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        jobmanager.archive.fs.dir: file:///opt/flink/completed-jobs/
+        historyserver.archive.fs.dir: file:///opt/flink/completed-jobs/
+        historyserver.archive.fs.refresh-interval: 10000
+
+  taskmanager:
+    image: flink-cdc
+    build:
+      context: ./
+    expose:
+      - "6121"
+      - "6122"
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    links:
+      - "jobmanager:jobmanager"
+    environment:
+      - TZ=Asia/Taipei
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 3
+```
 
 ### 注意事項
 - 版本要互相匹配, 不然會失敗
