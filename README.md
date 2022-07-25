@@ -6,16 +6,16 @@
 - [SQL Client](https://nightlies.apache.org/flink/flink-docs-release-1.13/docs/dev/table/sqlclient/)   
 
 
-- 運行方式
-1. Flink Session Cluster
-2. Flink Job Cluster
-3. Flink Application Cluster
+### [架構差異](https://www.modb.pro/db/128796)  
 
-- 集群方式
-1. standalone
-2. kubernetes
-  - [Kubernetes 安装](https://nightlies.apache.org/flink/flink-docs-master/zh/docs/deployment/resource-providers/standalone/kubernetes/)   
-3. YARN
+- Session Mode
+
+  該模式使用一個已經運行的集群來執行所有提交的應用程序。該集群中執行的應用程序競爭使用該集群的資源。這樣做的好處是，不必為每個提交的作業啟動一個集群，額外增加資源開銷。但是，該模式下，如果集群中的一個作業行為不正常或導致TaskManager宕機，則在該TaskManager上運行的所有作業都將受到故障的影響。也就是說，一個作業也會影響其他作業可能導致大規模的重啟。所有重新啟動的作業都會同時訪問文件系統，可能導致其他服務無法使用該文件系統。此外，讓單個集群運行多個作業意味著JobManager的負載更大。該模式適合於對啟動延遲要求較高且運行時間較短的作業，例如交互式查詢。
+- Application Mode  
+  Application 模式下，用戶程序的main 方法將在集群中而不是客戶端運行，用戶將程序邏輯和依賴打包進一個可執行的jar 包裡，集群的入口程序(ApplicationClusterEntryPoint) 負責調用其中的main 方法來生成JobGraph。Application 模式為每個提交的應用程序創建一個集群，該集群可以看作是在特定應用程序的作業之間共享的會話集群，並在應用程序完成時終止。在這種體系結構中，Application 模式在不同應用之間提供了資源隔離和負載平衡保證。在特定一個應用程序上，JobManager 執行main() 可以節省所需的CPU 週期，還可以節省本地下載依賴項所需的帶寬。
+- Per-Job Mode
+  - 不支援 kubernetes
+
 
 
 ### 架構說明
@@ -43,30 +43,32 @@ or
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
 ```
-### 配置設定方式
-- 配置檔案路徑為`opt/flink/conf/flink-conf.yaml`
-```
-jobmanager.rpc.address: jobmanager
-jobmanager.rpc.port: 6123
-jobmanager.memory.process.size: 4096m
-taskmanager.memory.process.size: 16384m
-taskmanager.numberOfTaskSlots: 10
-parallelism.default: 1
-jobmanager.execution.failover-strategy: region
-blob.server.port: 6124
-query.server.port: 6125
-```
 
-### 新增cdc jar
+---
+# flink CDC
+### flink CDC 特性
+This project provides a set of source connectors for Apache Flink® directly ingesting changes coming from different databases using Change Data Capture(CDC).
+
+### 使用方式
+- [CDC Connectors for Apache Flink 官方說明](https://ververica.github.io/flink-cdc-connectors/)   
+- 使用方式  
+  - [SQL API, Flink SQL Client](https://ververica.github.io/flink-cdc-connectors/master/content/about.html#usage-for-table-sql-api)  
+  - [DataStream API](https://ververica.github.io/flink-cdc-connectors/master/content/about.html#usage-for-datastream-api)  
+
+
+### 新增cdc connection jar
 - 將檔案放置`/opt/flink/lib`下
 
 ### 官方範例說明
-- [Streaming ETL for MySQL and Postgres with Flink CDC]()https://ververica.github.io/flink-cdc-connectors/master/content/quickstart/mysql-postgres-tutorial.html   
+- [Streaming ETL for MySQL and Postgres with Flink CDC](https://ververica.github.io/flink-cdc-connectors/master/content/quickstart/mysql-postgres-tutorial.html)   
 - [Oracle CDC to Elasticsearch](https://ververica.github.io/flink-cdc-connectors/master/content/quickstart/oracle-tutorial.html)   
 
 ### 注意事項
 - 版本要互相匹配, 不然會失敗
   - [Supported Connectors](https://ververica.github.io/flink-cdc-connectors/master/content/about.html#supported-flink-versions)         
+
+
+
 
 
 
