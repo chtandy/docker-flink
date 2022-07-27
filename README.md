@@ -35,6 +35,7 @@
 # flink CDC
 ### flink CDC 特性
 This project provides a set of source connectors for Apache Flink® directly ingesting changes coming from different databases using Change Data Capture(CDC).
+中文：該項目提供了一組apacheflink®直接攝入更改的源連接器
 
 ### 使用方式
 - [CDC Connectors for Apache Flink 官方說明](https://ververica.github.io/flink-cdc-connectors/)   
@@ -70,7 +71,7 @@ This project provides a set of source connectors for Apache Flink® directly ing
   - 進入jobmanager Container
   - /opt/flink/bin/historyserver.sh {start|stop|restart}
 - 瀏覽{flink IP}:8082
-- docker-compose範例
+- History docker-compose 的範例
 ```
 version: "3"
 services:
